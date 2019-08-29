@@ -926,11 +926,11 @@ you would recommend to each user.
           'analyze energy consumption in buildings',
           'pixieapp for outlier detection',
           'analyze precipitation data',
-          'working interactively with rstudio and notebooks in dsx',
-          '1357    what i learned implementing a classifier from {\ldots}\textbackslash{}nName: title, dtype: object',
           'apache spark™ 2.0: extend structured streaming for spark ml',
           'statistics for hackers',
-          'getting started with apache mahout']
+          'getting started with apache mahout',
+          'predict chronic kidney disease using spss modeler flows',
+          'time series anomaly detection algorithms – stats and bots']
 \end{Verbatim}
             
     \begin{Verbatim}[commandchars=\\\{\}]
@@ -1402,6 +1402,15 @@ features. Using the split below:
     \begin{Verbatim}[commandchars=\\\{\}]
 {\color{incolor}In [{\color{incolor}49}]:} \PY{n}{df\PYZus{}train} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{head}\PY{p}{(}\PY{l+m+mi}{40000}\PY{p}{)}
          \PY{n}{df\PYZus{}test} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{tail}\PY{p}{(}\PY{l+m+mi}{5993}\PY{p}{)}
+         \PY{n}{user\PYZus{}item\PYZus{}train} \PY{o}{=} \PY{k+kc}{None}
+         \PY{n}{user\PYZus{}item\PYZus{}test} \PY{o}{=} \PY{k+kc}{None}
+         \PY{n}{train\PYZus{}idx} \PY{o}{=} \PY{k+kc}{None}
+         \PY{n}{test\PYZus{}idx} \PY{o}{=} \PY{k+kc}{None}
+         \PY{n}{train\PYZus{}arts} \PY{o}{=} \PY{k+kc}{None}
+         \PY{n}{test\PYZus{}arts} \PY{o}{=}  \PY{k+kc}{None}
+         
+         \PY{n}{df\PYZus{}train} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{head}\PY{p}{(}\PY{l+m+mi}{40000}\PY{p}{)}
+         \PY{n}{df\PYZus{}test} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{tail}\PY{p}{(}\PY{l+m+mi}{5993}\PY{p}{)}
          
          \PY{k}{def} \PY{n+nf}{create\PYZus{}test\PYZus{}and\PYZus{}train\PYZus{}user\PYZus{}item}\PY{p}{(}\PY{n}{df\PYZus{}train}\PY{p}{,} \PY{n}{df\PYZus{}test}\PY{p}{)}\PY{p}{:}
              \PY{l+s+sd}{\PYZsq{}\PYZsq{}\PYZsq{}}
@@ -1421,15 +1430,45 @@ features. Using the split below:
              \PY{n}{user\PYZus{}item\PYZus{}train} \PY{o}{=} \PY{n}{create\PYZus{}user\PYZus{}item\PYZus{}matrix}\PY{p}{(}\PY{n}{df\PYZus{}train}\PY{p}{)}
              \PY{n}{user\PYZus{}item\PYZus{}test} \PY{o}{=} \PY{n}{create\PYZus{}user\PYZus{}item\PYZus{}matrix}\PY{p}{(}\PY{n}{df\PYZus{}test}\PY{p}{)}
              
-             \PY{n}{test\PYZus{}idx} \PY{o}{=} \PY{n}{user\PYZus{}item\PYZus{}test}\PY{o}{.}\PY{n}{index}\PY{o}{.}\PY{n}{values}
-             \PY{n}{test\PYZus{}arts} \PY{o}{=} \PY{n}{user\PYZus{}item\PYZus{}test}\PY{o}{.}\PY{n}{columns}\PY{o}{.}\PY{n}{values}
+             \PY{n}{train\PYZus{}idx} \PY{o}{=} \PY{n+nb}{set}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}train}\PY{o}{.}\PY{n}{index}\PY{p}{)}
+             \PY{n}{test\PYZus{}idx} \PY{o}{=} \PY{n+nb}{set}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}test}\PY{o}{.}\PY{n}{index}\PY{p}{)}
+             \PY{n}{match\PYZus{}idx} \PY{o}{=} \PY{n+nb}{list}\PY{p}{(}\PY{n}{train\PYZus{}idx}\PY{o}{.}\PY{n}{intersection}\PY{p}{(}\PY{n}{test\PYZus{}idx}\PY{p}{)}\PY{p}{)}
              
+             \PY{n}{train\PYZus{}arts} \PY{o}{=} \PY{n+nb}{set}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}train}\PY{o}{.}\PY{n}{columns}\PY{p}{)}
+             \PY{n}{test\PYZus{}arts} \PY{o}{=}  \PY{n+nb}{set}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}test}\PY{o}{.}\PY{n}{columns}\PY{p}{)}
+             \PY{n}{match\PYZus{}cols} \PY{o}{=} \PY{n+nb}{list}\PY{p}{(}\PY{n}{train\PYZus{}arts}\PY{o}{.}\PY{n}{intersection}\PY{p}{(}\PY{n}{test\PYZus{}arts}\PY{p}{)}\PY{p}{)}
+         
+             \PY{n}{user\PYZus{}item\PYZus{}test} \PY{o}{=} \PY{n}{user\PYZus{}item\PYZus{}test}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{n}{match\PYZus{}idx}\PY{p}{,} \PY{n}{match\PYZus{}cols}\PY{p}{]}
          
              \PY{k}{return} \PY{n}{user\PYZus{}item\PYZus{}train}\PY{p}{,} \PY{n}{user\PYZus{}item\PYZus{}test}\PY{p}{,} \PY{n}{test\PYZus{}idx}\PY{p}{,} \PY{n}{test\PYZus{}arts}
          
          \PY{n}{user\PYZus{}item\PYZus{}train}\PY{p}{,} \PY{n}{user\PYZus{}item\PYZus{}test}\PY{p}{,} \PY{n}{test\PYZus{}idx}\PY{p}{,} \PY{n}{test\PYZus{}arts} \PY{o}{=} \PY{n}{create\PYZus{}test\PYZus{}and\PYZus{}train\PYZus{}user\PYZus{}item}\PY{p}{(}\PY{n}{df\PYZus{}train}\PY{p}{,} \PY{n}{df\PYZus{}test}\PY{p}{)}
 \end{Verbatim}
 
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}50}]:} \PY{c+c1}{\PYZsh{} Replace the values in the dictionary below}
+         \PY{n}{a} \PY{o}{=} \PY{l+m+mi}{662} 
+         \PY{n}{b} \PY{o}{=} \PY{l+m+mi}{574} 
+         \PY{n}{c} \PY{o}{=} \PY{l+m+mi}{20} 
+         \PY{n}{d} \PY{o}{=} \PY{l+m+mi}{0} 
+         
+         
+         \PY{n}{sol\PYZus{}4\PYZus{}dict} \PY{o}{=} \PY{p}{\PYZob{}}
+             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{How many users can we make predictions for in the test set?}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n}{c}\PY{p}{,} 
+             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{How many users in the test set are we not able to make predictions for because of the cold start problem?}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n}{a}\PY{p}{,} 
+             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{How many movies can we make predictions for in the test set?}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n}{b}\PY{p}{,}
+             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{How many movies in the test set are we not able to make predictions for because of the cold start problem?}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n}{d}
+         \PY{p}{\PYZcb{}}
+         
+         \PY{n}{t}\PY{o}{.}\PY{n}{sol\PYZus{}4\PYZus{}test}\PY{p}{(}\PY{n}{sol\PYZus{}4\PYZus{}dict}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Awesome job!  That's right!  All of the test movies are in the training data, but there are only 20 test users that were also in the training set.  All of the other users that are in the test set we have no data on.  Therefore, we cannot make predictions for these users using SVD.
+
+    \end{Verbatim}
 
     \texttt{5.} Now use the \textbf{user\_item\_train} dataset from above to
 find U, S, and V transpose using SVD. Then find the subset of rows in
@@ -1444,16 +1483,10 @@ predictions for recommendations on the test data.
 
     \begin{Verbatim}[commandchars=\\\{\}]
 {\color{incolor}In [{\color{incolor}51}]:} \PY{c+c1}{\PYZsh{} fit SVD on the user\PYZus{}item\PYZus{}train matrix}
-         \PY{n}{u\PYZus{}train}\PY{p}{,} \PY{n}{s\PYZus{}train}\PY{p}{,} \PY{n}{vt\PYZus{}train} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{linalg}\PY{o}{.}\PY{n}{svd}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}train}\PY{p}{)}
-         \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{train: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{u\PYZus{}train}\PY{o}{.}\PY{n}{shape}\PY{p}{,} \PY{n}{s\PYZus{}train}\PY{o}{.}\PY{n}{shape}\PY{p}{,} \PY{n}{vt\PYZus{}train}\PY{o}{.}\PY{n}{shape}\PY{p}{)}
+         \PY{n}{u\PYZus{}train}\PY{p}{,} \PY{n}{s\PYZus{}train}\PY{p}{,} \PY{n}{vt\PYZus{}train} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{linalg}\PY{o}{.}\PY{n}{svd}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}train}\PY{p}{,} \PY{n}{dtype}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{int}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{,} \PY{n}{full\PYZus{}matrices}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}
          \PY{c+c1}{\PYZsh{} fit svd similar to above then use the cells below}
 \end{Verbatim}
 
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-train:  (4487, 4487) (714,) (714, 714)
-
-    \end{Verbatim}
 
     \begin{Verbatim}[commandchars=\\\{\}]
 {\color{incolor}In [{\color{incolor}52}]:} \PY{c+c1}{\PYZsh{} Use these cells to see how well you can use the training }
@@ -1462,63 +1495,54 @@ train:  (4487, 4487) (714,) (714, 714)
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}56}]:} \PY{n}{train\PYZus{}idx} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}train}\PY{o}{.}\PY{n}{index}\PY{p}{)}
-         \PY{n}{train\PYZus{}arts} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}train}\PY{o}{.}\PY{n}{columns}\PY{p}{)}
-         
-         \PY{n}{test\PYZus{}user\PYZus{}subset} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{intersect1d}\PY{p}{(}\PY{n}{test\PYZus{}idx}\PY{p}{,}\PY{n}{train\PYZus{}idx}\PY{p}{)}
-         \PY{n}{test\PYZus{}articles\PYZus{}subset} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{intersect1d}\PY{p}{(}\PY{n}{test\PYZus{}arts}\PY{p}{,}\PY{n}{train\PYZus{}arts}\PY{p}{)}
-         
-         \PY{n}{train\PYZus{}indexes} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{where}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{in1d}\PY{p}{(}\PY{n}{train\PYZus{}idx}\PY{p}{,} \PY{n}{test\PYZus{}user\PYZus{}subset}\PY{p}{)}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
-         \PY{n}{train\PYZus{}articles} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{where}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{in1d}\PY{p}{(}\PY{n}{train\PYZus{}arts}\PY{p}{,} \PY{n}{test\PYZus{}articles\PYZus{}subset}\PY{p}{)}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
-         
-         \PY{n}{test\PYZus{}indexes} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{where}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{in1d}\PY{p}{(}\PY{n}{test\PYZus{}idx}\PY{p}{,} \PY{n}{test\PYZus{}user\PYZus{}subset}\PY{p}{)}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
+{\color{incolor}In [{\color{incolor}53}]:} \PY{n}{row\PYZus{}idxs} \PY{o}{=} \PY{n}{user\PYZus{}item\PYZus{}train}\PY{o}{.}\PY{n}{index}\PY{o}{.}\PY{n}{isin}\PY{p}{(}\PY{n}{test\PYZus{}idx}\PY{p}{)}
+         \PY{n}{col\PYZus{}idxs} \PY{o}{=} \PY{n}{user\PYZus{}item\PYZus{}train}\PY{o}{.}\PY{n}{columns}\PY{o}{.}\PY{n}{isin}\PY{p}{(}\PY{n}{test\PYZus{}arts}\PY{p}{)}
+         \PY{n}{u\PYZus{}test} \PY{o}{=} \PY{n}{u\PYZus{}train}\PY{p}{[}\PY{n}{row\PYZus{}idxs}\PY{p}{,} \PY{p}{:}\PY{p}{]}
+         \PY{n}{vt\PYZus{}test} \PY{o}{=} \PY{n}{vt\PYZus{}train}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{n}{col\PYZus{}idxs}\PY{p}{]}
 \end{Verbatim}
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}57}]:} \PY{c+c1}{\PYZsh{} fit SVD on the user\PYZus{}item\PYZus{}train matrix}
-         \PY{n}{u\PYZus{}train}\PY{p}{,} \PY{n}{s\PYZus{}train}\PY{p}{,} \PY{n}{vt\PYZus{}train} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{linalg}\PY{o}{.}\PY{n}{svd}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}train}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}58}]:} \PY{n}{user\PYZus{}item\PYZus{}test\PYZus{}subset} \PY{o}{=} \PY{n}{user\PYZus{}item\PYZus{}test}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{n}{test\PYZus{}indexes}\PY{p}{,}\PY{p}{:}\PY{p}{]}
-         \PY{n}{user\PYZus{}item\PYZus{}train\PYZus{}subset} \PY{o}{=} \PY{n}{user\PYZus{}item\PYZus{}train}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{n}{train\PYZus{}indexes}\PY{p}{,}\PY{n}{train\PYZus{}articles}\PY{p}{]}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}59}]:} \PY{n}{num\PYZus{}latent\PYZus{}feats} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{arange}\PY{p}{(}\PY{l+m+mi}{10}\PY{p}{,}\PY{l+m+mi}{570}\PY{p}{,}\PY{l+m+mi}{10}\PY{p}{)}
-         \PY{n}{sum\PYZus{}errs} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+{\color{incolor}In [{\color{incolor}54}]:} \PY{n}{num\PYZus{}latent\PYZus{}feats} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{arange}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{700}\PY{o}{+}\PY{l+m+mi}{10}\PY{p}{,}\PY{l+m+mi}{20}\PY{p}{)}
+         \PY{n}{sum\PYZus{}errs\PYZus{}train} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+         \PY{n}{sum\PYZus{}errs\PYZus{}test} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+         \PY{n}{all\PYZus{}errs} \PY{o}{=} \PY{p}{[}\PY{p}{]}
          
          \PY{k}{for} \PY{n}{k} \PY{o+ow}{in} \PY{n}{num\PYZus{}latent\PYZus{}feats}\PY{p}{:}
              \PY{c+c1}{\PYZsh{} restructure with k latent features}
-             \PY{n}{s\PYZus{}train\PYZus{}k}\PY{p}{,} \PY{n}{u\PYZus{}train\PYZus{}k}\PY{p}{,} \PY{n}{vt\PYZus{}train\PYZus{}k} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{diag}\PY{p}{(}\PY{n}{s\PYZus{}train}\PY{p}{[}\PY{p}{:}\PY{n}{k}\PY{p}{]}\PY{p}{)}\PY{p}{,} \PY{n}{u\PYZus{}train}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{p}{:}\PY{n}{k}\PY{p}{]}\PY{p}{,} \PY{n}{vt\PYZus{}train}\PY{p}{[}\PY{p}{:}\PY{n}{k}\PY{p}{,} \PY{p}{:}\PY{p}{]}
-             
-             \PY{n}{s\PYZus{}test\PYZus{}k}\PY{p}{,} \PY{n}{u\PYZus{}test\PYZus{}k}\PY{p}{,} \PY{n}{vt\PYZus{}test\PYZus{}k} \PY{o}{=} \PY{n}{s\PYZus{}train\PYZus{}k}\PY{p}{,} \PY{n}{u\PYZus{}train\PYZus{}k}\PY{p}{[}\PY{n}{train\PYZus{}indexes}\PY{p}{,}\PY{p}{:}\PY{p}{]}\PY{p}{,} \PY{n}{vt\PYZus{}train\PYZus{}k}\PY{p}{[}\PY{p}{:}\PY{p}{,}\PY{n}{train\PYZus{}articles}\PY{p}{]}
+             \PY{n}{s\PYZus{}train\PYZus{}lat}\PY{p}{,} \PY{n}{u\PYZus{}train\PYZus{}lat}\PY{p}{,} \PY{n}{vt\PYZus{}train\PYZus{}lat} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{diag}\PY{p}{(}\PY{n}{s\PYZus{}train}\PY{p}{[}\PY{p}{:}\PY{n}{k}\PY{p}{]}\PY{p}{)}\PY{p}{,} \PY{n}{u\PYZus{}train}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{p}{:}\PY{n}{k}\PY{p}{]}\PY{p}{,} \PY{n}{vt\PYZus{}train}\PY{p}{[}\PY{p}{:}\PY{n}{k}\PY{p}{,} \PY{p}{:}\PY{p}{]}
+             \PY{n}{u\PYZus{}test\PYZus{}lat}\PY{p}{,} \PY{n}{vt\PYZus{}test\PYZus{}lat} \PY{o}{=} \PY{n}{u\PYZus{}test}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{p}{:}\PY{n}{k}\PY{p}{]}\PY{p}{,} \PY{n}{vt\PYZus{}test}\PY{p}{[}\PY{p}{:}\PY{n}{k}\PY{p}{,} \PY{p}{:}\PY{p}{]}
              
              \PY{c+c1}{\PYZsh{} take dot product}
-             \PY{n}{user\PYZus{}item\PYZus{}test\PYZus{}subset\PYZus{}est} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{around}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{dot}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{dot}\PY{p}{(}\PY{n}{u\PYZus{}test\PYZus{}k}\PY{p}{,} \PY{n}{s\PYZus{}test\PYZus{}k}\PY{p}{)}\PY{p}{,} \PY{n}{vt\PYZus{}test\PYZus{}k}\PY{p}{)}\PY{p}{)}
+             \PY{n}{user\PYZus{}item\PYZus{}train\PYZus{}preds} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{around}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{dot}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{dot}\PY{p}{(}\PY{n}{u\PYZus{}train\PYZus{}lat}\PY{p}{,} \PY{n}{s\PYZus{}train\PYZus{}lat}\PY{p}{)}\PY{p}{,} \PY{n}{vt\PYZus{}train\PYZus{}lat}\PY{p}{)}\PY{p}{)}
+             \PY{n}{user\PYZus{}item\PYZus{}test\PYZus{}preds} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{around}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{dot}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{dot}\PY{p}{(}\PY{n}{u\PYZus{}test\PYZus{}lat}\PY{p}{,} \PY{n}{s\PYZus{}train\PYZus{}lat}\PY{p}{)}\PY{p}{,} \PY{n}{vt\PYZus{}test\PYZus{}lat}\PY{p}{)}\PY{p}{)}
+             \PY{n}{all\PYZus{}errs}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{l+m+mi}{1} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}test\PYZus{}preds}\PY{p}{)}\PY{o}{+}\PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}test}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}test}\PY{o}{.}\PY{n}{shape}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{*}\PY{n}{user\PYZus{}item\PYZus{}test}\PY{o}{.}\PY{n}{shape}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+             
              
              \PY{c+c1}{\PYZsh{} compute error for each prediction to actual value}
-             \PY{n}{diffs} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{subtract}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}test\PYZus{}subset}\PY{p}{,} \PY{n}{user\PYZus{}item\PYZus{}test\PYZus{}subset\PYZus{}est}\PY{p}{)}
+             \PY{n}{diffs\PYZus{}train} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{subtract}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}train}\PY{p}{,} \PY{n}{user\PYZus{}item\PYZus{}train\PYZus{}preds}\PY{p}{)}
+             \PY{n}{diffs\PYZus{}test} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{subtract}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}test}\PY{p}{,} \PY{n}{user\PYZus{}item\PYZus{}test\PYZus{}preds}\PY{p}{)}
              
              \PY{c+c1}{\PYZsh{} total errors and keep track of them}
-             \PY{n}{err} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{abs}\PY{p}{(}\PY{n}{diffs}\PY{p}{)}\PY{p}{)}\PY{p}{)}
-             \PY{n}{sum\PYZus{}errs}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{err}\PY{p}{)}
-         
-         
-         \PY{n}{n\PYZus{}interactions\PYZus{}subset} \PY{o}{=} \PY{n}{user\PYZus{}item\PYZus{}test\PYZus{}subset}\PY{o}{.}\PY{n}{shape}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{*}\PY{n}{user\PYZus{}item\PYZus{}test\PYZus{}subset}\PY{o}{.}\PY{n}{shape}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}
+             \PY{n}{err\PYZus{}train} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{abs}\PY{p}{(}\PY{n}{diffs\PYZus{}train}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+             \PY{n}{err\PYZus{}test} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{abs}\PY{p}{(}\PY{n}{diffs\PYZus{}test}\PY{p}{)}\PY{p}{)}\PY{p}{)}
              
-         \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{num\PYZus{}latent\PYZus{}feats}\PY{p}{,} \PY{l+m+mi}{1} \PY{o}{\PYZhy{}} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{sum\PYZus{}errs}\PY{p}{)}\PY{o}{/}\PY{n}{n\PYZus{}interactions\PYZus{}subset}\PY{p}{)}\PY{p}{;}
+             \PY{n}{sum\PYZus{}errs\PYZus{}train}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{err\PYZus{}train}\PY{p}{)}
+             \PY{n}{sum\PYZus{}errs\PYZus{}test}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{err\PYZus{}test}\PY{p}{)}
+             
+             
+         \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{num\PYZus{}latent\PYZus{}feats}\PY{p}{,} \PY{l+m+mi}{1} \PY{o}{\PYZhy{}} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{sum\PYZus{}errs\PYZus{}train}\PY{p}{)}\PY{o}{/}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}train}\PY{o}{.}\PY{n}{shape}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{*}\PY{n}{user\PYZus{}item\PYZus{}test}\PY{o}{.}\PY{n}{shape}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Train}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{num\PYZus{}latent\PYZus{}feats}\PY{p}{,} \PY{l+m+mi}{1} \PY{o}{\PYZhy{}} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{sum\PYZus{}errs\PYZus{}test}\PY{p}{)}\PY{o}{/}\PY{p}{(}\PY{n}{user\PYZus{}item\PYZus{}test}\PY{o}{.}\PY{n}{shape}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{*}\PY{n}{user\PYZus{}item\PYZus{}test}\PY{o}{.}\PY{n}{shape}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Test}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{num\PYZus{}latent\PYZus{}feats}\PY{p}{,} \PY{n}{all\PYZus{}errs}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{All Data}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
          \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Number of Latent Features}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
          \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Accuracy}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
          \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Accuracy vs. Number of Latent Features}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}\PY{p}{;}
 \end{Verbatim}
 
 
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_78_0.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_77_0.png}
     \end{center}
     { \hspace*{\fill} \\}
     
@@ -1531,7 +1555,7 @@ currently find articles?
     \textbf{Your response here.}
 
 \begin{verbatim}
-It appears that the accuracy is decreasing as the number  Features increases. This could be due to not much variety being in the datasets we may add more data so that we could train on a more diversified set of data.
+For the training data the accuracy increases to near 100% as the number of features increases.But for the testing data, it appears that the accuracy is decreases when the number of features increases. This could be due to not much variety being in the datasets we may add more data so that we could train on a more diversified set of data.
 \end{verbatim}
 
      \#\#\# Extras Using your workbook, you could now save your
@@ -1583,11 +1607,15 @@ created. Congratulations!
 \end{quote}
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor} }]:} \PY{k+kn}{from} \PY{n+nn}{subprocess} \PY{k}{import} \PY{n}{call}
-        \PY{n}{call}\PY{p}{(}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{python}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}m}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nbconvert}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Recommendations\PYZus{}with\PYZus{}IBM.ipynb}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}55}]:} \PY{k+kn}{from} \PY{n+nn}{subprocess} \PY{k}{import} \PY{n}{call}
+         \PY{n}{call}\PY{p}{(}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{python}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}m}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nbconvert}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Recommendations\PYZus{}with\PYZus{}IBM.ipynb}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
 \end{Verbatim}
 
 
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}55}]:} 1
+\end{Verbatim}
+            
 
     % Add a bibliography block to the postdoc
     
